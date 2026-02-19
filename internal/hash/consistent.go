@@ -6,8 +6,6 @@ import (
 	"sync"
 )
 
-// Ring implements consistent hashing for distributing keys across nodes.
-// Supports dynamic node addition and removal with minimal key movement.
 type Ring struct {
 	mu         sync.RWMutex
 	replicas   int
@@ -16,7 +14,6 @@ type Ring struct {
 	nodes      map[string]struct{}
 }
 
-// NewRing creates a consistent hash ring with the given number of virtual nodes per physical node.
 func NewRing(replicas int) *Ring {
 	if replicas < 1 {
 		replicas = 64
@@ -28,12 +25,10 @@ func NewRing(replicas int) *Ring {
 	}
 }
 
-// hashKey returns a uint32 hash for the given key.
 func hashKey(key string) uint32 {
 	return crc32.ChecksumIEEE([]byte(key))
 }
 
-// Add adds a node to the ring with multiple virtual replicas.
 func (r *Ring) Add(node string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -49,7 +44,6 @@ func (r *Ring) Add(node string) {
 	sort.Slice(r.sortedKeys, func(i, j int) bool { return r.sortedKeys[i] < r.sortedKeys[j] })
 }
 
-// Remove removes a node and all its virtual replicas from the ring.
 func (r *Ring) Remove(node string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -68,8 +62,6 @@ func (r *Ring) Remove(node string) {
 	r.sortedKeys = newKeys
 }
 
-// Get returns the node responsible for the given key.
-// Returns empty string if the ring is empty.
 func (r *Ring) Get(key string) string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -86,8 +78,6 @@ func (r *Ring) Get(key string) string {
 	return r.circle[r.sortedKeys[idx]]
 }
 
-// GetN returns the N nodes responsible for the key (for replication).
-// Fewer than N may be returned if the ring has fewer nodes.
 func (r *Ring) GetN(key string, n int) []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -114,7 +104,6 @@ func (r *Ring) GetN(key string, n int) []string {
 	return result
 }
 
-// Nodes returns all physical nodes in the ring.
 func (r *Ring) Nodes() []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -126,7 +115,6 @@ func (r *Ring) Nodes() []string {
 	return out
 }
 
-// Contains returns whether the node is in the ring.
 func (r *Ring) Contains(node string) bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()

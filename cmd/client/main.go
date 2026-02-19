@@ -1,6 +1,3 @@
-// Simple gRPC client for testing the KV store.
-// Usage: go run ./cmd/client -addr localhost:50051 get <key>
-//        go run ./cmd/client -addr localhost:50051 set <key> <value>
 package main
 
 import (

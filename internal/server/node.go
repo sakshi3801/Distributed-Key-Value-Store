@@ -21,7 +21,6 @@ type member struct {
 	Term     int64
 }
 
-// Node is a single node in the distributed KV cluster.
 type Node struct {
 	ID       string
 	Address  string
@@ -37,7 +36,6 @@ type Node struct {
 	conns     map[string]*grpc.ClientConn
 }
 
-// NewNode creates a new node with the given id and listen address.
 func NewNode(id, address string, replicas int) *Node {
 	r := hash.NewRing(64)
 	n := &Node{
@@ -53,17 +51,14 @@ func NewNode(id, address string, replicas int) *Node {
 	return n
 }
 
-// Ring returns the consistent hash ring (read-only usage via Get/GetN).
 func (n *Node) Ring() *hash.Ring {
 	return n.Ring
 }
 
-// Store returns the local key-value store.
 func (n *Node) Store() *store.Store {
 	return n.Store
 }
 
-// GetConn returns a gRPC client connection to the given node ID (by address).
 func (n *Node) GetConn(nodeID string) (*grpc.ClientConn, error) {
 	n.mu.RLock()
 	addr := ""
@@ -91,7 +86,6 @@ func (n *Node) GetConn(nodeID string) (*grpc.ClientConn, error) {
 	return c, nil
 }
 
-// UpdateMembers updates the hash ring and membership from a list of (id, address) pairs.
 func (n *Node) UpdateMembers(ids, addresses []string) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
@@ -111,7 +105,6 @@ func (n *Node) UpdateMembers(ids, addresses []string) {
 			n.Ring.Add(id)
 		}
 	}
-	// Remove nodes no longer in the list
 	for id := range n.members {
 		found := false
 		for _, x := range ids {
@@ -128,7 +121,6 @@ func (n *Node) UpdateMembers(ids, addresses []string) {
 	}
 }
 
-// ReplicateToReplicas sends a write to the next N-1 nodes in the ring for the key.
 func (n *Node) ReplicateToReplicas(ctx context.Context, key string, value []byte, version int64, isDelete bool) {
 	nodes := n.Ring.GetN(key, n.Replicas)
 	for _, nodeID := range nodes {
@@ -150,7 +142,6 @@ func (n *Node) ReplicateToReplicas(ctx context.Context, key string, value []byte
 	}
 }
 
-// StartLeaderElection runs a simple bully-style election: try to become leader.
 func (n *Node) StartLeaderElection(ctx context.Context) bool {
 	n.mu.Lock()
 	n.term++
@@ -188,14 +179,12 @@ func (n *Node) StartLeaderElection(ctx context.Context) bool {
 	return false
 }
 
-// IsLeader returns whether this node is the current leader.
 func (n *Node) IsLeader() bool {
 	n.mu.RLock()
 	defer n.mu.RUnlock()
 	return n.leaderID == n.ID()
 }
 
-// SendHeartbeats sends leader heartbeats to all members.
 func (n *Node) SendHeartbeats(ctx context.Context) {
 	n.mu.RLock()
 	term := n.term
@@ -220,7 +209,6 @@ func (n *Node) SendHeartbeats(ctx context.Context) {
 	}
 }
 
-// SeedPeers adds initial peer addresses as members (using address as id if no id given).
 func (n *Node) SeedPeers(peerList []string) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
@@ -245,7 +233,6 @@ func (n *Node) SeedPeers(peerList []string) {
 	}
 }
 
-// SetLeader sets the leader (used when receiving heartbeats).
 func (n *Node) SetLeader(id string, term int64) {
 	n.mu.Lock()
 	defer n.mu.Unlock()

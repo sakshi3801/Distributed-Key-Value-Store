@@ -7,18 +7,15 @@ import (
 	"github.com/kvstore/distributed-kv/api"
 )
 
-// ClusterServer implements the Cluster gRPC service for membership and leader election.
 type ClusterServer struct {
 	api.UnimplementedClusterServer
 	node *Node
 }
 
-// NewClusterServer returns a new ClusterServer.
 func NewClusterServer(node *Node) *ClusterServer {
 	return &ClusterServer{node: node}
 }
 
-// Heartbeat is called by the leader to maintain authority, or by nodes to register.
 func (s *ClusterServer) Heartbeat(ctx context.Context, req *api.HeartbeatRequest) (*api.HeartbeatResponse, error) {
 	if req == nil {
 		return &api.HeartbeatResponse{Accepted: false}, nil

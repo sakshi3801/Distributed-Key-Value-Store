@@ -3,7 +3,6 @@
 proto:
 	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative api/kv.proto
 
-# Generate proto without local protoc (requires Docker)
 proto-docker:
 	docker run --rm -v "$$(pwd):/workspace" -w /workspace \
 	  golang:1.21-alpine sh -c 'apk add --no-cache protobuf-dev protobuf && \
