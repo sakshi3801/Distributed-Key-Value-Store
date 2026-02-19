@@ -74,7 +74,3 @@ Use any node as the gRPC endpoint; requests are forwarded to the correct node by
 - **Store** (`internal/store`): In-memory KV with versioning for ordering and replication.
 - **Server** (`internal/server`): Implements `KeyValue` and `Cluster` gRPC services; forwards Get/Set/Delete to the ring owner; replicates writes to N nodes.
 - **Node** (`internal/server/node.go`): Holds ring, store, membership, leader state; runs election and heartbeats when peers are configured.
-
-## License
-
-MIT
