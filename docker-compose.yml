@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  node1:
+    build: .
+    container_name: kv-node1
+    command: ["./node", "-id", "node1", "-addr", "0.0.0.0:50051", "-peers", "node2:50052,node3:50053", "-replicas", "2"]
+    ports:
+      - "50051:50051"
+    networks:
+      kvnet:
+        aliases:
+          - node1
+
+  node2:
+    build: .
+    container_name: kv-node2
+    command: ["./node", "-id", "node2", "-addr", "0.0.0.0:50052", "-peers", "node1:50051,node3:50053", "-replicas", "2"]
+    ports:
+      - "50052:50052"
+    networks:
+      kvnet:
+        aliases:
+          - node2
+
+  node3:
+    build: .
+    container_name: kv-node3
+    command: ["./node", "-id", "node3", "-addr", "0.0.0.0:50053", "-peers", "node1:50051,node2:50052", "-replicas", "2"]
+    ports:
+      - "50053:50053"
+    networks:
+      kvnet:
+        aliases:
+          - node3
+
+networks:
+  kvnet:
+    driver: bridge
